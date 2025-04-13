@@ -4,16 +4,10 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
 from src.database.dao.holder import HolderDAO
-from src.states.general_states import CHECK_STATES
+from src.states.general import CheckStates
 
 router: Router = Router()
 
-
-@router.message(Command(commands=["start"]))
-async def process_help_command(message: Message):
-    await message.answer(
-        text="Привет!"
-    )
 
 @router.message(Command(commands=["get_all"]))
 async def get_all_users(
@@ -29,7 +23,7 @@ async def create_state(
     message: Message,
     state: FSMContext,
 ):
-    await state.set_state(CHECK_STATES.TEST_STATE)
+    await state.set_state(CheckStates.TEST_STATE)
     state = await state.get_state()
     await message.answer(text=f"Current state is {state}")
 

@@ -4,10 +4,8 @@ import datetime
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from sqlalchemy import (
-JSON, BigInteger, Boolean, DateTime, Enum,
-ForeignKey, Interval, String, Text
-)
+from sqlalchemy import (JSON, BigInteger, Boolean, DateTime, Enum, ForeignKey,
+                        Interval, String, Text)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database.models import Base

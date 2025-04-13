@@ -6,13 +6,13 @@ from aiogram.fsm.storage.redis import Redis
 from aiogram.types import CallbackQuery, ContentType, Message
 
 from src.database.dao.holder import HolderDAO
-from src.filters import admin_filters
+from src.filters import admin
 from src.services.broadcaster import broadcast
-from src.states.admin_states import MakeBroadcastState
+from src.states.admin import MakeBroadcastState
 from src.text.text import AdminMessages
 
 router: Router = Router()
-router.message.filter(admin_filters.AdminFilter())
+router.message.filter(admin.AdminFilter())
 
 
 async def message_echo(message: Message, state: FSMContext):

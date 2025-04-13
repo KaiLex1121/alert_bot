@@ -9,7 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from src.config.main_config import Config, load_config
 from src.database.models.base import create_pool
-from src.handlers import admin_handlers, test_handlers, main_menu_handlers
+from src.handlers import (admin, main_menu, reminder_creation, test_handlers,
+                          view_created_reminders)
 from src.middlewares.config import ConfigMiddleware
 from src.middlewares.data_loader import LoadDataMiddleware
 from src.middlewares.database import DBMiddleware
@@ -18,8 +19,10 @@ from src.utils.general import set_commands
 
 
 def setup_handlers(dp: Dispatcher) -> None:
-    dp.include_router(main_menu_handlers.router)
-    dp.include_router(admin_handlers.router)
+    dp.include_router(main_menu.router)
+    dp.include_router(reminder_creation.router)
+    dp.include_router(view_created_reminders.router)
+    dp.include_router(admin.router)
     dp.include_router(test_handlers.router)
 
 

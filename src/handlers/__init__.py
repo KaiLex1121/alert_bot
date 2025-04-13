@@ -1,3 +1,3 @@
-from .admin import admin_handlers
-from .general import test_handlers
-from .general import main_menu_handlers
+from .admin import admin
+from .general import (main_menu, reminder_creation, test_handlers,
+                      view_created_reminders)
