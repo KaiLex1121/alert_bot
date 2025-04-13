@@ -1,6 +1,0 @@
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-
-
-class InlineAdminButtons: ...
-
-class InlineAdminKeyboards: ...

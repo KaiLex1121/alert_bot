@@ -1,18 +1,18 @@
-"""First commit
+"""Added reminder model
 
-Revision ID: 8eefd33d652a
+Revision ID: fd4d7a1f19dd
 Revises: 
-Create Date: 2025-04-04 00:15:11.308734
+Create Date: 2025-04-12 23:44:27.850746
 
 """
 from typing import Sequence, Union
 
-import sqlalchemy as sa
 from alembic import op
+import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '8eefd33d652a'
+revision: str = 'fd4d7a1f19dd'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -38,6 +38,8 @@ def upgrade() -> None:
     sa.Column('last_name', sa.String(), nullable=True),
     sa.Column('username', sa.String(), nullable=True),
     sa.Column('is_bot', sa.Boolean(), nullable=False),
+    sa.Column('is_banned', sa.Boolean(), nullable=True),
+    sa.Column('is_admin', sa.Boolean(), nullable=False),
     sa.Column('language_code', sa.String(), nullable=True),
     sa.Column('created_at', postgresql.TIMESTAMP(), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id', name=op.f('pk__users')),

@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
 from src.database.dao.holder import HolderDAO
-from src.states.user_states import CHECK_STATES
+from src.states.general_states import CHECK_STATES
 
 router: Router = Router()
 

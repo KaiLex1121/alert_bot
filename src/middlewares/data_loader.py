@@ -19,7 +19,7 @@ class LoadDataMiddleware(BaseMiddleware):
     ) -> Any:
         holder_dao = data["dao"]
         data["user"] = await save_user(data, holder_dao)
-        # data["chat"] = await save_chat(data, holder_dao)
+        data["message_to_delete"] = None
         result = await handler(event, data)
         return result
 

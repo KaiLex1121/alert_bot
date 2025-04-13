@@ -7,7 +7,6 @@ from aiogram.types import CallbackQuery, ContentType, Message
 
 from src.database.dao.holder import HolderDAO
 from src.filters import admin_filters
-from src.keyboards.inline_keyboards import InlineAdminKeyboards
 from src.services.broadcaster import broadcast
 from src.states.admin_states import MakeBroadcastState
 from src.text.text import AdminMessages

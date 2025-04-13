@@ -9,16 +9,16 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from src.config.main_config import Config, load_config
 from src.database.models.base import create_pool
-from src.handlers import admin_handlers, test_handlers, user_handlers
+from src.handlers import admin_handlers, test_handlers, main_menu_handlers
 from src.middlewares.config import ConfigMiddleware
 from src.middlewares.data_loader import LoadDataMiddleware
 from src.middlewares.database import DBMiddleware
 from src.middlewares.redis import RedisMiddleware
-from src.utils.commands import set_commands
+from src.utils.general import set_commands
 
 
 def setup_handlers(dp: Dispatcher) -> None:
-    dp.include_router(user_handlers.router)
+    dp.include_router(main_menu_handlers.router)
     dp.include_router(admin_handlers.router)
     dp.include_router(test_handlers.router)
 

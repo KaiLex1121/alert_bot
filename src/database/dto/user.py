@@ -14,6 +14,9 @@ class User:
     last_name: str | None = None
     is_bot: bool | None = None
     language_code: str | None = None
+    is_admin: bool | None = None
+    is_banned: bool | None = None
+
 
     @classmethod
     def from_aiogram(cls, user: tg.User) -> User:

@@ -1,10 +1,12 @@
-from .notification import Notification
+from __future__ import annotations
+
 
 from sqlalchemy import BigInteger
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.database.dto import dto
+from src.database import dto
 from src.database.models import Base
+
 
 
 class User(Base):
@@ -17,10 +19,10 @@ class User(Base):
     last_name: Mapped[str | None]
     username: Mapped[str | None]
     is_bot: Mapped[bool] = mapped_column(default=False)
-    is_banned: Mapped[bool] = mapped_column(default=False)
+    is_banned: Mapped[bool] = mapped_column(default=False, nullable=True)
     is_admin: Mapped[bool] = mapped_column(default=False)
     language_code: Mapped[str | None] = mapped_column(default=None)
-    notifications: Mapped[list['Notification'] | None] = relationship(
+    reminders: Mapped[list['Reminder'] | None] = relationship(
         back_populates="user",
         lazy="selectin"
     )
