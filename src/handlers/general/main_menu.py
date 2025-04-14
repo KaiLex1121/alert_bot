@@ -14,7 +14,7 @@ router: Router = Router()
 
 @router.callback_query(F.data == "to_main_menu")
 async def render_main_menu(callback: CallbackQuery, bot: Bot, state: FSMContext):
-    text = "Вы вернулись в главное меню.\n Выберите действие"
+    text = "Вы вернулись в главное меню.\nВыберите действие"
     try:
         await callback.message.edit_text(
             text=text,

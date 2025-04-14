@@ -23,11 +23,11 @@ class ReminderCreationButtons:
     )
 
     start_reminder_now = InlineKeyboardButton(
-        text="Запустить напоминание сейчас", callback_data="start_reminder_now"
+        text="Сейчас", callback_data="start_reminder_now"
     )
 
     start_reminder_other_time = InlineKeyboardButton(
-        text="Запустить напоминание в другое время", callback_data="start_reminder_other_time"
+        text="В другое время", callback_data="start_reminder_other_time"
     )
     confirm_reminder_creation = InlineKeyboardButton(
         text="Подтвердить создание напоминания", callback_data="confirm_reminder_creation"
@@ -57,4 +57,34 @@ class ReminderCreationKeyboards:
                 ReminderCreationButtons.to_main_menu
             ],
         ]
+    )
+
+    choose_reminder_start_time = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                ReminderCreationButtons.start_reminder_now,
+                ReminderCreationButtons.start_reminder_other_time
+            ],
+            [
+                ReminderCreationButtons.to_main_menu
+            ],
+        ]
+    )
+
+    to_main_menu = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                ReminderCreationButtons.to_main_menu
+            ],
+        ]
+    )
+
+    confirm_reminder_creation = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                ReminderCreationButtons.confirm_reminder_creation
+            ],
+            [
+                ReminderCreationButtons.to_main_menu]
+            ]
     )
