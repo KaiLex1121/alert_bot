@@ -10,8 +10,6 @@ class ChatDAO(BaseDAO[Chat]):
         super().__init__(Chat, session)
 
     async def get_by_tg_id(self, tg_id: int) -> Chat:
-        result = await self.session.execute(
-            select(Chat).where(Chat.tg_id == tg_id)
-        )
+        result = await self.session.execute(select(Chat).where(Chat.tg_id == tg_id))
 
         return result.scalar_one()

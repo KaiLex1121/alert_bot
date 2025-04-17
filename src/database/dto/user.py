@@ -17,7 +17,6 @@ class User:
     is_admin: bool | None = None
     is_banned: bool | None = None
 
-
     @classmethod
     def from_aiogram(cls, user: tg.User) -> User:
         return cls(

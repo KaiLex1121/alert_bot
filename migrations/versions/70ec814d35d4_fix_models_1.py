@@ -5,14 +5,15 @@ Revises: c0ceb27c4428
 Create Date: 2025-04-13 00:02:15.164165
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = '70ec814d35d4'
-down_revision: Union[str, None] = 'c0ceb27c4428'
+revision: str = "70ec814d35d4"
+down_revision: Union[str, None] = "c0ceb27c4428"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

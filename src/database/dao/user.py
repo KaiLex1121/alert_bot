@@ -24,16 +24,14 @@ class UserDAO(BaseDAO[User]):
         start_date = end_date - timedelta(days=7)
 
         result = await self.session.execute(
-            select(func.count(self.model.id))
-            .where(
+            select(func.count(self.model.id)).where(
                 and_(
                     self.model.created_at >= start_date,
-                    self.model.created_at <= end_date
+                    self.model.created_at <= end_date,
                 )
             )
         )
         return result.scalar_one()
-
 
     async def upsert_user(self, user: dto.User) -> dto.User:
         kwargs = dict(

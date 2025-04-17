@@ -20,11 +20,9 @@ class User(Base):
     is_banned: Mapped[bool] = mapped_column(default=False, nullable=True)
     is_admin: Mapped[bool] = mapped_column(default=False)
     language_code: Mapped[str | None] = mapped_column(default=None)
-    reminders: Mapped[list['Reminder'] | None] = relationship(
-        back_populates="user",
-        lazy="selectin"
+    reminders: Mapped[list["Reminder"] | None] = relationship(
+        back_populates="user", lazy="selectin"
     )
-
 
     def to_dto(self) -> dto.User:
         return dto.User(
@@ -36,15 +34,11 @@ class User(Base):
             is_bot=self.is_bot,
             language_code=self.language_code,
             is_admin=self.is_admin,
-            is_banned=self.is_banned
+            is_banned=self.is_banned,
         )
 
     def __repr__(self):
-        rez = (
-            f"<User "
-            f"ID={self.tg_id} "
-            f"name={self.first_name} {self.last_name} "
-        )
+        rez = f"<User " f"ID={self.tg_id} " f"name={self.first_name} {self.last_name} "
         if self.username:
             rez += f"username=@{self.username}"
         return rez + ">"

@@ -22,10 +22,8 @@ class ViewCreatedRemindersKeyboards:
         inline_keyboard=[
             [
                 ViewCreatedRemindersButtons.show_active_reminders,
-                ViewCreatedRemindersButtons.show_disabled_reminders
+                ViewCreatedRemindersButtons.show_disabled_reminders,
             ],
-            [
-                ViewCreatedRemindersButtons.to_main_menu
-            ],
+            [ViewCreatedRemindersButtons.to_main_menu],
         ],
     )

@@ -14,9 +14,9 @@ class ReminderCreateStates(StatesGroup):
     waiting_for_reminder_type = State()
     waiting_for_custom_interval = State()
     waiting_for_start_time_choice = State()
-    waiting_for_start_date = State()
-    waiting_for_start_time = State()
+    waiting_for_start_datetime = State()
     waiting_for_reminder_confirmation = State()
+
 
 class ReminderEditStates(StatesGroup):
     pass

@@ -27,6 +27,7 @@ async def create_state(
     state = await state.get_state()
     await message.answer(text=f"Current state is {state}")
 
+
 @router.message(Command(commands=["cancel_check_state"]))
 async def cancel_state(
     message: Message,
@@ -44,9 +45,6 @@ async def message_echo(message: Message, state: FSMContext):
 
 
 @router.message()
-async def callback_echo(
-        callback: CallbackQuery,
-        state: FSMContext
-):
+async def callback_echo(callback: CallbackQuery, state: FSMContext):
     state = await state.get_state()
     await callback.answer(text=f"Callback попал сюда c состоянием {state}")

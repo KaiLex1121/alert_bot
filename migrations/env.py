@@ -12,11 +12,11 @@ from src.database.models import Base
 
 # Load and read DB environments
 dotenv.load_dotenv()
-db_user = os.getenv('POSTGRES_USER')
-db_pass = os.getenv('POSTGRES_PASSWORD')
-db_host = os.getenv('DB_HOST')
-db_port = os.getenv('DB_PORT')
-db_name = os.getenv('POSTGRES_DB')
+db_user = os.getenv("POSTGRES_USER")
+db_pass = os.getenv("POSTGRES_PASSWORD")
+db_host = os.getenv("DB_HOST")
+db_port = os.getenv("DB_PORT")
+db_name = os.getenv("POSTGRES_DB")
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -24,7 +24,7 @@ config = context.config
 
 config.set_main_option(
     "sqlalchemy.url",
-    f"postgresql+asyncpg://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
+    f"postgresql+asyncpg://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}",
 )
 
 # Docker config

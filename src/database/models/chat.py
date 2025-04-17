@@ -16,14 +16,11 @@ class Chat(Base):
     username: Mapped[str | None]
 
     def __repr__(self):
-        rez = (
-            f"<Chat "
-            f"ID={self.tg_id} "
-            f"title={self.title} "
-        )
+        rez = f"<Chat " f"ID={self.tg_id} " f"title={self.title} "
         if self.username:
             rez += f"username=@{self.username}"
         return rez + ">"
+
 
 #     # def to_dto(self) -> dto.Chat:
 #     #     return dto.Chat(
