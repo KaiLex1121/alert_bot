@@ -18,7 +18,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database.models import Base
-from src.enums.notification import FrequencyType
+from src.enums.reminder import FrequencyType
 
 
 class Reminder(Base):

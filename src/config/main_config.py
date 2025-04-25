@@ -54,25 +54,26 @@ class DbConfig:
 
 @dataclass
 class RedisConfig:
-    redis_pass: Optional[str]
-    redis_port: Optional[int]
-    redis_host: Optional[str]
+    host: Optional[str]
+    password: Optional[str]
+    port: Optional[int]
+    database: Optional[int]
 
     def create_uri(self) -> str:
-        """
-        Constructs and returns a Redis DSN (Data Source Name) for this database configuration.
-        """
-
-        return f"redis://{self.redis_host}:{self.redis_port}/1"
+        return f"redis://:{self.password}@{self.host}:{self.port}/{self.database}"
 
     @staticmethod
     def load_from_env(env: Env):
-        redis_pass = env.str("REDIS_PASSWORD")
-        redis_port = env.int("REDIS_PORT")
-        redis_host = env.str("REDIS_HOST")
+        password = env.str("REDIS_PASSWORD")
+        port = env.int("REDIS_PORT")
+        host = env.str("REDIS_HOST")
+        database = env.int("REDIS_DB")
 
         return RedisConfig(
-            redis_pass=redis_pass, redis_port=redis_port, redis_host=redis_host
+            password=password,
+            port=port,
+            host=host,
+            database=database,
         )
 
 
