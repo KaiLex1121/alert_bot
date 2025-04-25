@@ -9,7 +9,7 @@ from src.config.bot_setup import (
     setup_storage,
 )
 from src.config.main_config import load_config
-from src.database.models import create_pool
+from src.database.engine import create_pool
 from src.services.scheduler import SchedulerService
 from src.utils.general import set_commands
 from src.utils.setup_logging import setup_logging
@@ -25,9 +25,14 @@ async def main() -> None:
 
     setup_handlers(dp)
     setup_middlewares(
-        dp, create_pool(config.db), config, storage.redis, scheduler_service
+        dp=dp,
+        pool=create_pool(config.db),
+        bot_config=config,
+        redis=storage.redis,
+        scheduler_service=scheduler_service
     )
     setup_logging()
+
     scheduler_service.scheduler.start()
 
     await set_commands(bot)

@@ -2,12 +2,9 @@ from datetime import datetime
 
 from sqlalchemy import MetaData
 from sqlalchemy.dialects.postgresql import TIMESTAMP
-from sqlalchemy.engine import make_url
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.sql.functions import func
 
-from src.config.main_config import DbConfig
 
 convention = {
     "ix": "ix__%(column_0_label)s",
@@ -21,19 +18,4 @@ meta = MetaData(naming_convention=convention)
 
 class Base(DeclarativeBase):
     metadata = meta
-
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP, server_default=func.now())
-
-
-def create_pool(db_config: DbConfig) -> async_sessionmaker[AsyncSession]:
-
-    engine = create_async_engine(url=make_url(db_config.create_uri()))
-    pool: async_sessionmaker[AsyncSession] = async_sessionmaker(
-        bind=engine,
-        class_=AsyncSession,
-        expire_on_commit=False,
-        autoflush=False,
-        autocommit=False,
-    )
-
-    return pool
