@@ -1,32 +1,29 @@
 import logging
 from datetime import datetime
+import uuid
 
 from aiogram import Bot
 from apscheduler.job import Job
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
-from src.database.models.reminder import Reminder  # Импортируем модель
-
-# Важно: Функция, которая будет выполняться по расписанию
-# Она должна быть импортируема APScheduler'ом, поэтому лучше вынести ее
-# в отдельный модуль или определить здесь на верхнем уровне.
+from src.database.dao.holder import HolderDAO
+from src.database.models import Reminder
+from src.services.reminder import ReminderService  # Импортируем модель
 
 logger = logging.getLogger(__name__)
 
 
 # --- Функция задачи ---
-async def send_reminder_job(bot: Bot, chat_id: int, reminder_id: int, text: str):
-    """
-    Функция, выполняемая APScheduler для отправки напоминания.
-    """
+async def send_reminder_job(bot: Bot, tg_user_id: int, reminder_id: int, text: str):
     try:
         logger.info(
-            f"Sending reminder job for reminder_id={reminder_id} to chat_id={chat_id}"
+            f"Sending reminder job for reminder_id={reminder_id} for user_id={user_id}"
         )
-        await bot.send_message(chat_id=chat_id, text=f"🔔 Напоминание:\n\n{text}")
-        logger.info(f"Reminder sent successfully for reminder_id={reminder_id}")
+        await bot.send_message(user_id=tg_user_id, text=f"Напоминание:\n\n{text}")
+        logger.info(
+            f"Reminder sent successfully for user_id={user_id} reminder_id={reminder_id}"
+        )
     except Exception as e:
         logger.error(
             f"Error sending reminder job for reminder_id={reminder_id}: {e}",
@@ -51,37 +48,25 @@ class SchedulerService:
             self.scheduler.shutdown()
             logger.info("Scheduler stopped.")
 
-    async def add_reminder_job(self, reminder: Reminder) -> str | None:
-        """Добавляет задачу напоминания в планировщик."""
-        trigger_args = reminder.get_apscheduler_trigger_args()
-        if not trigger_args:
-            logger.error(
-                f"Cannot schedule reminder {reminder.id}: Invalid interval data."
-            )
-            return None
+    async def add_reminder_job(self, reminder, tg_user_id: int) -> str | None:
+        # trigger_args = reminder_service.get_apscheduler_trigger_args()
+        job_id = uuid.uuid4().hex
 
-        job_id = f"reminder_{reminder.id}"
         try:
-            # Удаляем старую задачу, если она существует (на случай обновления)
             await self.remove_job(job_id)
-
             job = self.scheduler.add_job(
                 send_reminder_job,
-                trigger=IntervalTrigger(**trigger_args),
+                trigger=IntervalTrigger(seconds=15),
                 id=job_id,
-                name=f"Reminder for user {reminder.user_id} (ID: {reminder.id})",
-                replace_existing=True,  # Заменить существующую задачу с тем же ID
-                # Передаем аргументы в функцию send_reminder_job
+                name=f"Reminder {reminder.id}",
+                replace_existing=True,
                 kwargs={
-                    "bot": self.bot,  # Передаем экземпляр бота
-                    "chat_id": reminder.user_id,  # ID пользователя = chat_id
+                    "bot": self.bot,
+                    "user_tg_id": tg_user_id,
                     "reminder_id": reminder.id,
                     "text": reminder.text,
                 },
-                misfire_grace_time=60 * 5,  # 5 минут на выполнение пропущенной задачи
-            )
-            logger.info(
-                f"Scheduled job {job.id} for reminder {reminder.id}. Next run: {job.next_run_time}"
+                misfire_grace_time=60 * 5,
             )
             return job.id
         except Exception as e:

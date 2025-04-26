@@ -6,9 +6,8 @@ import pytz
 from dateutil.relativedelta import relativedelta  # Для сложных интервалов
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.database.dao import ReminderDAO
+from src.database.dao import ReminderDAO, HolderDAO
 from src.database.models import Reminder
-from src.database.models.repo import ReminderRepository
 from src.services.scheduler import SchedulerService  # Импортируем сервис планировщика
 
 from ..utils.datetime_utils import parse_custom_interval  # Нужна функция парсинга
@@ -17,37 +16,40 @@ logger = logging.getLogger(__name__)
 
 
 class ReminderService:
-    def __init__(self, session: AsyncSession, scheduler_service: SchedulerService):
-        self.session = session
-        self.repo = ReminderRepository(session)
+    def __init__(
+        self,
+        dao: HolderDAO,
+        scheduler_service: SchedulerService,
+    ):
+        self.dao = dao
         self.scheduler_service = scheduler_service
 
     async def create_new_reminder(
         self,
         user_id: int,
+        tg_user_id: int,
         text: str,
-        start_dt_utc: datetime,
+        start_datetime: datetime,
         interval_data: dict,
-        user_tz: str = "UTC",
     ) -> Optional[Reminder]:
         """Создает напоминание, сохраняет в БД и добавляет в планировщик."""
         try:
             # 1. Создаем запись в БД
-            reminder = await self.repo.create_reminder(
+            reminder = await self.dao.create_reminder(
                 user_id=user_id,
                 text=text,
-                start_datetime_utc=start_dt_utc,
-                interval_data=interval_data,
-                user_timezone=user_tz,
+                start_datetime=start_datetime,
+                frequency_type=interval_data["frequency_type"],
+                custom_frequency=interval_data["custom_frequency"],
+                apscheduler_job_id=None,
             )
-            await self.session.flush()  # Убедимся, что ID присвоен
 
             # 2. Добавляем задачу в APScheduler
-            job_id = await self.scheduler_service.add_reminder_job(reminder)
+            job_id = await self.scheduler_service.add_reminder_job(reminder, tg_user_id)
 
             if job_id:
                 # 3. Сохраняем job_id в БД
-                await self.repo.update_job_id(reminder.id, job_id)
+                await self.dao.update(reminder, {"apscheduler_job_id": job_id})
                 await self.session.commit()  # Коммитим все изменения
                 logger.info(
                     f"Successfully created reminder {reminder.id} with job_id {job_id}"

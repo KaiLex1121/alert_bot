@@ -32,18 +32,18 @@ class Reminder(Base):
     user: Mapped["User"] = relationship(back_populates="reminders", lazy="joined")
     text: Mapped[str] = mapped_column(nullable=False)
     is_active: Mapped[bool] = mapped_column(
-        default=True, index=True
-    )  # Активно ли напоминание
-    job_id: Mapped[Optional[str]] = mapped_column(index=True)  # ID задачи в APScheduler
-    frequency_type: Mapped[FrequencyType] = mapped_column(
-        Enum(FrequencyType, name="frequency_type_enum")
+        Boolean, default=True, nullable=False, index=True
     )
-    custom_interval: Mapped[Dict[str, Any] | None] = mapped_column(JSON)
+    frequency_type: Mapped[FrequencyType] = mapped_column(
+        Enum(FrequencyType, name="frequency_type_enum", nullable=False, index=True)
+    )
+    custom_frequency: Mapped[Optional[Dict[str, Any]]] = mapped_column(
+        JSON, nullable=True
+    )
     start_datetime: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-
-    apscheduler_job_id: Mapped[str | None] = mapped_column(
+    apscheduler_job_id: Mapped[str] = mapped_column(
         String(255), unique=True, index=True
-    )  # Связь с задачей APScheduler
+    )
 
     def __repr__(self):
         rez = f"<User " f"ID={self.tg_id} " f"name={self.first_name} {self.last_name} "

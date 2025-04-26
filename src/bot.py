@@ -29,7 +29,7 @@ async def main() -> None:
         pool=create_pool(config.db),
         bot_config=config,
         redis=storage.redis,
-        scheduler_service=scheduler_service
+        scheduler_service=scheduler_service,
     )
     setup_logging()
 
