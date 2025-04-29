@@ -1,7 +1,7 @@
 import os
 from typing import Union
 
-from aiogram import Dispatcher
+from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.storage.redis import DefaultKeyBuilder, Redis, RedisStorage
 from apscheduler.jobstores.redis import RedisJobStore
@@ -9,20 +9,23 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from src.config.main_config import Config
-
-from src.handlers import (
-    admin,
-    main_menu,
-    reminder_creation,
-    test_handlers,
-    view_created_reminders,
-)
+from src.handlers import (admin, main_menu, reminder_creation, test_handlers,
+                          view_created_reminders)
 from src.middlewares.config import ConfigMiddleware
 from src.middlewares.data_loader import LoadDataMiddleware
 from src.middlewares.database import DBMiddleware
 from src.middlewares.redis import RedisMiddleware
-from src.middlewares.scheduler import SchedulerMiddleware
+from src.services.reminder import ReminderService
 from src.services.scheduler import SchedulerService
+
+
+def setup_services(dp: Dispatcher, scheduler: AsyncIOScheduler) -> None:
+
+    scheduler_service = SchedulerService(scheduler=scheduler)
+    reminder_service = ReminderService(scheduler_service=SchedulerService)
+    dp.workflow_data.update(
+        scheduler_service=scheduler_service, reminder_service=reminder_service
+    )
 
 
 def setup_scheduler(config: Config) -> AsyncIOScheduler:
@@ -54,13 +57,11 @@ def setup_middlewares(
     pool: async_sessionmaker[AsyncSession],
     bot_config: Config,
     redis: Redis,
-    scheduler_service: SchedulerService,
 ) -> None:
     dp.update.outer_middleware(ConfigMiddleware(bot_config))
     dp.update.outer_middleware(DBMiddleware(pool))
     dp.update.outer_middleware(RedisMiddleware(redis))
     dp.update.outer_middleware(LoadDataMiddleware())
-    dp.update.outer_middleware(SchedulerMiddleware(scheduler_service))
 
 
 def setup_storage(config: Config) -> Union[MemoryStorage, RedisStorage]:

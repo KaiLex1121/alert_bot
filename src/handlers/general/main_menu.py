@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any
 
 from aiogram import Bot, F, Router
@@ -6,7 +7,11 @@ from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
+from src.database.dao.holder import HolderDAO
+from src.database.dto.user import User
 from src.keyboards.main_menu import MainMenuKeyboards
+from src.services.reminder import ReminderService
+from src.services.scheduler import SchedulerService
 from src.states.general import MainStates
 
 router: Router = Router()
@@ -37,3 +42,59 @@ async def get_started(
         text="Выберите действие", reply_markup=MainMenuKeyboards.main_window
     )
     await state.set_state(MainStates.MAIN_DIALOG)
+
+
+@router.message(Command("create_reminder"))
+async def create_reminder(
+    message: Message,
+    reminder_service: ReminderService,
+    scheduler_service: SchedulerService,
+    dao: HolderDAO,
+    user: User,
+):
+    await reminder_service.create_new_reminder(
+        scheduler_service=scheduler_service,
+        dao=dao,
+        user_id=user.db_id,
+        tg_user_id=user.tg_id,
+        text="Test",
+        start_datetime=datetime.now(),
+        frequency_type="DAILY",
+        custom_frequency={
+            "day": 1,
+            "hour": 0,
+            "minute": 0,
+        },
+    )
+
+    await message.answer(text="Yo")
+
+
+@router.message(Command("disable_reminders"))
+async def disable_reminders(
+    message: Message,
+    reminder_service: ReminderService,
+    scheduler_service: SchedulerService,
+    dao: HolderDAO,
+):
+    await reminder_service.disable_all_reminders(scheduler_service, dao)
+    await message.answer(text="Reminders are disabled")
+
+
+@router.message(Command("enable_reminders"))
+async def enable_reminders(
+    message: Message,
+    reminder_service: ReminderService,
+    scheduler_service: SchedulerService,
+    dao: HolderDAO,
+):
+    await reminder_service.enable_all_reminders(scheduler_service, dao)
+    await message.answer(text="Reminders are enabled")
+
+
+@router.message(Command("get_all_reminders"))
+async def get_all_reminders(
+    message: Message, reminder_service: ReminderService, dao: HolderDAO
+):
+    reminders = await reminder_service.get_all_reminders(dao)
+    await message.answer(text=f"Reminders: {reminders}")

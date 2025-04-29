@@ -2,22 +2,12 @@ from __future__ import annotations
 
 import datetime
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
-from sqlalchemy import (
-    JSON,
-    BigInteger,
-    Boolean,
-    DateTime,
-    Enum,
-    ForeignKey,
-    Interval,
-    String,
-    Text,
-)
+from sqlalchemy import JSON, Boolean, DateTime, Enum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.database.models import Base
+from src.database.models.base import Base
 from src.enums.reminder import FrequencyType
 
 
@@ -30,23 +20,25 @@ class Reminder(Base):
         ForeignKey(column="users.id", ondelete="CASCADE")
     )
     user: Mapped["User"] = relationship(back_populates="reminders", lazy="joined")
-    text: Mapped[str] = mapped_column(nullable=False)
+    text: Mapped[str] = mapped_column(String(255), nullable=False)
     is_active: Mapped[bool] = mapped_column(
         Boolean, default=True, nullable=False, index=True
     )
     frequency_type: Mapped[FrequencyType] = mapped_column(
-        Enum(FrequencyType, name="frequency_type_enum", nullable=False, index=True)
+        Enum(FrequencyType, name="frequency_type_enum"), nullable=False, index=True
     )
-    custom_frequency: Mapped[Optional[Dict[str, Any]]] = mapped_column(
-        JSON, nullable=True
+    custom_frequency: Mapped[Dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    start_datetime: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
     )
-    start_datetime: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    apscheduler_job_id: Mapped[str] = mapped_column(
+    apscheduler_job_id: Mapped[str | None] = mapped_column(
         String(255), unique=True, index=True
     )
 
     def __repr__(self):
-        rez = f"<User " f"ID={self.tg_id} " f"name={self.first_name} {self.last_name} "
-        if self.username:
-            rez += f"username=@{self.username}"
-        return rez + ">"
+        return (
+            f"Reminder(id={self.id}, user_id={self.user_id}, text={self.text}, "
+            f"is_active={self.is_active}, frequency_type={self.frequency_type}, "
+            f"custom_frequency={self.custom_frequency}, start_datetime={self.start_datetime}, "
+            f"apscheduler_job_id={self.apscheduler_job_id})"
+        )

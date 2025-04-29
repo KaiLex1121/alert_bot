@@ -5,7 +5,6 @@ from aiogram.types import TelegramObject
 
 from src.database import dto
 from src.database.dao.holder import HolderDAO
-
 # from app.services.chat import upsert_chat
 from src.services.user import upsert_user
 

@@ -1,6 +1,8 @@
-from src.config.main_config import DbConfig
 from sqlalchemy.engine import make_url
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
+                                    create_async_engine)
+
+from src.config.main_config import DbConfig
 
 
 def create_pool(db_config: DbConfig) -> async_sessionmaker[AsyncSession]:

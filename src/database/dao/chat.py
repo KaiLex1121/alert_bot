@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from src.database.dao.base import BaseDAO
-from src.database.models import Chat
+from src.database.models.chat import Chat
 
 
 class ChatDAO(BaseDAO[Chat]):

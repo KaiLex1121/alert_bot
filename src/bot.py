@@ -2,13 +2,11 @@ import asyncio
 
 from aiogram import Bot, Dispatcher
 
-from src.config.bot_setup import (
-    setup_handlers,
-    setup_middlewares,
-    setup_scheduler,
-    setup_storage,
-)
+from src.config.bot_setup import (setup_handlers, setup_middlewares,
+                                  setup_scheduler, setup_services,
+                                  setup_storage)
 from src.config.main_config import load_config
+from src.context import AppContext
 from src.database.engine import create_pool
 from src.services.scheduler import SchedulerService
 from src.utils.general import set_commands
@@ -21,20 +19,16 @@ async def main() -> None:
     bot = Bot(token=config.tg_bot.token)
     dp = Dispatcher(storage=storage)
     scheduler = setup_scheduler(config=config)
-    scheduler_service = SchedulerService(bot=bot, scheduler=scheduler)
 
     setup_handlers(dp)
     setup_middlewares(
-        dp=dp,
-        pool=create_pool(config.db),
-        bot_config=config,
-        redis=storage.redis,
-        scheduler_service=scheduler_service,
+        dp=dp, pool=create_pool(config.db), bot_config=config, redis=storage.redis
     )
     setup_logging()
+    setup_services(dp=dp, scheduler=scheduler)
 
-    scheduler_service.scheduler.start()
-
+    AppContext.set_bot(bot)
+    scheduler.start()
     await set_commands(bot)
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)

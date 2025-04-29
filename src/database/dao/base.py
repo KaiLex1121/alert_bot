@@ -1,10 +1,13 @@
+import logging
 from typing import Any, Generic, List, Optional, Type, TypeVar
 
 from sqlalchemy import delete, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from src.database.models import Base
+from src.database.models.base import Base
+
+logger = logging.getLogger(__name__)
 
 Model = TypeVar("Model", bound=Base)
 
@@ -14,32 +17,31 @@ class BaseDAO(Generic[Model]):
         self.model = model
         self.session = session
 
-    def get_by_id(self, id: Any) -> Optional[Model]:
-        return self.db_session.get(self.model, id)
+    async def get_by_id(self, id: Any) -> Optional[Model]:
+        return await self.session.get(self.model, id)
 
-    def get_all(self, skip: int = 0, limit: int = 100) -> List[Model]:
+    async def get_all(self, skip: int = 0) -> List[Model]:
 
-        stmt = select(self.model).offset(skip).limit(limit)
-        result = self.db_session.execute(stmt)
+        stmt = select(self.model).offset(skip)
+        result = await self.session.execute(stmt)
         return result.scalars().all()
 
-    def create(self, obj: Model):
-        object = self.session.add(obj)
-        return object
+    async def create(self, obj: Model):
+        self.session.add(obj)
 
-    def update(self, db_obj: Model, update_data: dict) -> None:
+    async def update(self, db_obj: Model, update_data: dict) -> None:
         for key, value in update_data.items():
             if hasattr(db_obj, key):
                 setattr(db_obj, key, value)
             else:
-                self.logger.warning(
+                logger.warning(
                     f"Attribute '{key}' not found in model {self.model.__name__} during update."
                 )
-        self.db_session.add(db_obj)
+        self.session.add(db_obj)
         return db_obj
 
-    def delete(self, db_obj: Model) -> None:
-        self.db_session.delete(db_obj)
+    async def delete(self, db_obj: Model) -> None:
+        await self.session.delete(db_obj)
 
     async def flush(self, *objects):
         await self.session.flush(objects)

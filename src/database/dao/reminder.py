@@ -1,6 +1,4 @@
-from sqlalchemy import desc, func, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 
 from src.database.dao.base import BaseDAO
 from src.database.models.reminder import Reminder
@@ -11,16 +9,25 @@ class ReminderDAO(BaseDAO[Reminder]):
         super().__init__(Reminder, session)
 
     async def create_reminder(
-        self, user_id, apscheduler_job_id, FSM_dict: dict
+        self,
+        tg_user_id,
+        apscheduler_job_id,
+        text,
+        start_datetime,
+        frequency_type,
+        custom_frequency,
     ) -> Reminder:
         reminder = Reminder(
-            user_id=user_id,
-            text=FSM_dict["text"],
-            frequency_type=FSM_dict["frequency_type"],
-            custom_frequency=FSM_dict["custom_frequency"],
-            start_datetime=FSM_dict["start_datetime"],
+            user_id=tg_user_id,
+            text=text,
+            start_datetime=start_datetime,
+            frequency_type=frequency_type,
+            custom_frequency=custom_frequency,
             apscheduler_job_id=apscheduler_job_id,
         )
+        await self.create(reminder)
+        return reminder
 
-        object = self.create(reminder)
-        return object
+    async def delete_all_reminders(self):
+        all_reminders = await self.get_all()
+        return all_reminders

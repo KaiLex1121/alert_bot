@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.redis import Redis
 from aiogram.types import CallbackQuery, Message
 
-from src.database.dao import HolderDAO
+from src.database.dao.holder import HolderDAO
 from src.keyboards.view_created_reminders import ViewCreatedRemindersKeyboards
 
 router: Router = Router()

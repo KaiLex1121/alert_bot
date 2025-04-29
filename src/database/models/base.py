@@ -5,7 +5,6 @@ from sqlalchemy.dialects.postgresql import TIMESTAMP
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.sql.functions import func
 
-
 convention = {
     "ix": "ix__%(column_0_label)s",
     "uq": "uq__%(table_name)s__%(column_0_name)s",
@@ -19,3 +18,6 @@ meta = MetaData(naming_convention=convention)
 class Base(DeclarativeBase):
     metadata = meta
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP, server_default=func.now(), onupdate=func.now()
+    )

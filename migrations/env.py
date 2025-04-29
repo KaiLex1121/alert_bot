@@ -9,6 +9,9 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from src.database.models.base import Base
+from src.database.models.chat import Chat
+from src.database.models.reminder import Reminder
+from src.database.models.user import User
 
 # Load and read DB environments
 dotenv.load_dotenv()
@@ -26,6 +29,7 @@ config.set_main_option(
     "sqlalchemy.url",
     f"postgresql+asyncpg://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}",
 )
+
 
 # Docker config
 

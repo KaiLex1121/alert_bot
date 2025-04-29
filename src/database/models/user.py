@@ -4,7 +4,7 @@ from sqlalchemy import BigInteger
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database import dto
-from src.database.models import Base
+from src.database.models.base import Base
 
 
 class User(Base):
@@ -21,7 +21,8 @@ class User(Base):
     is_admin: Mapped[bool] = mapped_column(default=False)
     language_code: Mapped[str | None] = mapped_column(default=None)
     reminders: Mapped[list["Reminder"] | None] = relationship(
-        back_populates="user", lazy="selectin"
+        back_populates="user",
+        lazy="selectin",
     )
 
     def to_dto(self) -> dto.User:
