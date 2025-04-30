@@ -11,15 +11,15 @@ class ReminderCreationButtons:
     yearly_reminder = InlineKeyboardButton(text="Ежегодно", callback_data="yearly")
 
     custom_reminder_type = InlineKeyboardButton(
-        text="Другое", callback_data="custom_reminder_type"
+        text="Другое", callback_data="other"
     )
 
     start_reminder_now = InlineKeyboardButton(
-        text="Сейчас", callback_data="start_reminder_now"
+        text="Сейчас", callback_data="start_now"
     )
 
     start_reminder_other_time = InlineKeyboardButton(
-        text="В другое время", callback_data="start_reminder_other_time"
+        text="В другое время", callback_data="start_another_time"
     )
     confirm_reminder_creation = InlineKeyboardButton(
         text="Подтвердить создание напоминания",

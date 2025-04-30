@@ -1,4 +1,7 @@
 import asyncio
+import datetime
+import os
+import time
 
 from aiogram import Bot, Dispatcher
 
@@ -11,7 +14,7 @@ from src.database.engine import create_pool
 from src.services.scheduler import SchedulerService
 from src.utils.general import set_commands
 from src.utils.setup_logging import setup_logging
-
+from pytz import timezone
 
 async def main() -> None:
     config = load_config(".env")
@@ -27,8 +30,11 @@ async def main() -> None:
     setup_logging()
     setup_services(dp=dp, scheduler=scheduler)
 
+    os.environ['TZ'] = 'Europe/Moscow'
+    time.tzset()
     AppContext.set_bot(bot)
     scheduler.start()
+
     await set_commands(bot)
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)

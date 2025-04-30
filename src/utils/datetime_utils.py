@@ -1,85 +1,139 @@
 import re
 from datetime import date, datetime, time, timedelta
-from typing import Dict, Optional, Tuple
-
-import pytz
-from dateutil.parser import parse as dateutil_parse
+from typing import Dict, Union, Tuple, Optional, Any
 from dateutil.relativedelta import relativedelta
 
-    # Регулярное выражение для парсинга кастомного интервала
-    # Пример: "3 года 10 месяцев 24 дня 15 часов 15 минут"
-    INTERVAL_REGEX = re.compile(
-        r"\s*(?:(?P<years>\d+)\s*(?:г|год|года|лет))?"
-        r"\s*(?:(?P<months>\d+)\s*(?:мес|месяц|месяца|месяцев))?"
-        r"\s*(?:(?P<weeks>\d+)\s*(?:н|нед|неделя|недели|недель))?"
-        r"\s*(?:(?P<days>\d+)\s*(?:д|дн|день|дня|дней))?"
-        r"\s*(?:(?P<hours>\d+)\s*(?:ч|час|часа|часов))?"
-        r"\s*(?:(?P<minutes>\d+)\s*(?:м|мин|минута|минуты|минут))?\s*",
-        re.IGNORECASE | re.UNICODE
+
+def parse_frequency(frequency: str | None) -> Dict[str, int]:
+
+    if frequency:
+
+        result = {}
+
+        # Все возможные единицы измерения и их нормализация
+        units_mapping = {
+            'минут': 'minutes', 'минуты': 'minutes', 'мин': 'minutes', 'м': 'minutes',
+            'часов': 'hours', 'часа': 'hours', 'час': 'hours', 'ч': 'hours',
+            'дней': 'days', 'дня': 'days', 'день': 'days', 'д': 'days',
+            'недель': 'weeks', 'неделя': 'weeks', 'недели': 'weeks', 'н': 'weeks',
+            'месяцев': 'months', 'месяца': 'months', 'месяц': 'months', 'мес': 'months',
+            'лет': 'years', 'года': 'years', 'год': 'years', 'г': 'years'
+        }
+
+        # Регулярное выражение для поиска числа и единицы измерения
+        pattern = r'(\d+)\s+(минут|минуты|мин|м|часов|часа|час|ч|дней|дня|день|д|недель|неделя|недели|н|месяцев|месяца|месяц|мес|лет|года|год|г)'
+
+        matches = re.findall(pattern, frequency, re.IGNORECASE)
+
+        for value, unit in matches:
+            value = int(value)
+            normalized_unit = units_mapping.get(unit.lower())
+            if normalized_unit:
+                result[normalized_unit] = value
+
+        return result
+
+
+def parse_start_time(start_time: str) -> str:
+
+    if start_time == "start_now":
+        start_time = datetime.now()
+        to_return = datetime.isoformat(datetime.now())
+        print(to_return)
+        print(start_time)
+        return to_return
+
+    # Define month mapping
+    month_map = {
+        'января': 1, 'февраля': 2, 'марта': 3, 'апреля': 4,
+        'мая': 5, 'июня': 6, 'июля': 7, 'августа': 8,
+        'сентября': 9, 'октября': 10, 'ноября': 11, 'декабря': 12
+    }
+
+    # Pattern for format: DD month YYYY года/г HH:MM
+    pattern = r'(\d{1,2})\s*([а-яА-Я]+)\s*(\d{4})\s*(?:года|г)?\s*(\d{1,2}):(\d{2})'
+
+    match = re.match(pattern, start_time.lower().strip())
+    if not match:
+        raise ValueError(f"Invalid datetime format: {start_time}")
+
+    day, month_str, year, hour, minute = match.groups()
+
+    # Convert month name to number
+    month = None
+    for m_name, m_num in month_map.items():
+        if month_str.startswith(m_name[:3]):  # Match first 3 letters
+            month = m_num
+            break
+
+    if not month:
+        raise ValueError(f"Invalid month name: {month_str}")
+
+    # Create datetime object
+    dt = datetime(
+        year=int(year),
+        month=month,
+        day=int(day),
+        hour=int(hour),
+        minute=int(minute)
     )
 
-    def parse_custom_interval(text: str) -> Optional[Dict[str, int]]:
-        """Парсит строку кастомного интервала и возвращает словарь компонентов."""
-        match = INTERVAL_REGEX.fullmatch(text.strip())
-        if not match:
-            return None
+    return dt.isoformat()
 
-        data = {k: int(v) for k, v in match.groupdict().items() if v is not None}
-        if not data: # Если ничего не найдено
-            return None
 
-        # Добавляем 'description' для хранения исходной строки или форматированного описания
-        # data['description'] = text.strip() # Или можно сформировать красивое описание
-        return data
+def create_trigger_args(
+    frequency_type: str,
+    start_datetime: str,
+    custom_frequency: str | None = None
+) -> Tuple[str, Dict[str, Any]]:
 
-    def get_interval_description(interval_data: dict) -> str:
-        """Создает читаемое описание интервала."""
-        parts = []
-        if interval_data.get('years'): parts.append(f"{interval_data['years']} г.")
-        if interval_data.get('months'): parts.append(f"{interval_data['months']} мес.")
-        if interval_data.get('weeks'): parts.append(f"{interval_data['weeks']} нед.")
-        if interval_data.get('days'): parts.append(f"{interval_data['days']} дн.")
-        if interval_data.get('hours'): parts.append(f"{interval_data['hours']} ч.")
-        if interval_data.get('minutes'): parts.append(f"{interval_data['minutes']} мин.")
-        return "Каждые " + ", ".join(parts) if parts else "Однократно" # Или другая логика
+    # Определяем тип триггера и его параметры в зависимости от частоты
+    if frequency_type == "daily":
+        return 'cron', {
+            'start_date': start_datetime,
+            'hour': datetime.fromisoformat(start_datetime).hour,
+            'minute': datetime.fromisoformat(start_datetime).minute,
+        }
+    elif frequency_type == "weekly":
+        return 'cron', {
+            'start_date': start_datetime,
+            'day_of_week': datetime.fromisoformat(start_datetime).weekday(),
+            'hour': datetime.fromisoformat(start_datetime).hour,
+            'minute': datetime.fromisoformat(start_datetime).minute,
+        }
+    elif frequency_type == "monthly":
+        return 'cron', {
+            'start_date': start_datetime,
+            'day': datetime.fromisoformat(start_datetime).day,
+            'hour': datetime.fromisoformat(start_datetime).hour,
+            'minute': datetime.fromisoformat(start_datetime).minute,
+        }
+    elif frequency_type == "yearly":
+        dt = datetime.fromisoformat(start_datetime)
+        return 'cron', {
+            'start_date': start_datetime,
+            'month': dt.month,
+            'day': dt.day,
+            'hour': dt.hour,
+            'minute': dt.minute,
+        }
+    elif frequency_type == "other":
+        custom_frequency
+        if not custom_frequency:
+            raise ValueError(f"Не удалось распознать частоту: {custom_frequency}")
 
-    def validate_future_date(selected_date: date) -> bool:
-        """Проверяет, что выбранная дата не в прошлом."""
-        today = datetime.now(pytz.utc).date() # Сравниваем с UTC датой
-        return selected_date >= today
+        return 'interval', {
+            'start_date': start_datetime,
+            **custom_frequency
+        }
+    else:
+        raise ValueError(f"Неподдерживаемый тип частоты: {frequency_type}")
 
-    def validate_future_time(selected_date: date, selected_time: time) -> bool:
-        """Проверяет, что выбранное время не в прошлом для СЕГОДНЯШНЕЙ даты."""
-        now = datetime.now(pytz.utc) # Работаем в UTC
-        today_utc = now.date()
 
-        if selected_date > today_utc:
-            return True # Если дата в будущем, любое время подходит
-        if selected_date < today_utc:
-            return False # Дата в прошлом
-
-        # Если дата сегодня, сравниваем время
-        selected_dt = datetime.combine(selected_date, selected_time, tzinfo=pytz.utc)
-        # Добавляем небольшой буфер (например, 1 минута), чтобы избежать гонки условий
-        return selected_dt > (now + timedelta(minutes=1))
-
-    def combine_date_time_to_utc(selected_date: date, selected_time: time, user_tz_str: str = 'UTC') -> datetime:
-        """Объединяет дату и время и конвертирует в UTC."""
-        try:
-            user_tz = pytz.timezone(user_tz_str)
-        except pytz.UnknownTimeZoneError:
-            user_tz = pytz.utc # Fallback to UTC
-
-        naive_dt = datetime.combine(selected_date, selected_time)
-        local_dt = user_tz.localize(naive_dt)
-        utc_dt = local_dt.astimezone(pytz.utc)
-        return utc_dt
-
-    def format_datetime_user(dt_utc: datetime, user_tz_str: str = 'UTC') -> str:
-         """Форматирует datetime UTC в строку для пользователя с учетом его таймзоны."""
-         try:
-             user_tz = pytz.timezone(user_tz_str)
-         except pytz.UnknownTimeZoneError:
-             user_tz = pytz.utc
-         local_dt = dt_utc.astimezone(user_tz)
-         return local_dt.strftime("%d.%m.%Y %H:%M (%Z)") # Пример формата
+# Tests
+# frequency_type = "other"
+# custom_frequency = "15 минут"
+# start_time = "30 мая 2025 года 23:45"
+# start_time_now = "start_now"
+# result = create_trigger_args(frequency_type=frequency_type, start_datetime=start_time, custom_frequency=custom_frequency)
+# print(result)

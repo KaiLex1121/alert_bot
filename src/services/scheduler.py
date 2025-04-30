@@ -37,15 +37,16 @@ class SchedulerService:
     def __init__(self, scheduler: AsyncIOScheduler):
         self.scheduler = scheduler
 
-    async def add_reminder_job(self, reminder, tg_user_id: int) -> str | None:
-        # trigger_args = reminder_service.get_apscheduler_trigger_args()
+    async def add_reminder_job(self, reminder, tg_user_id: int, trigger_type, trigger_args) -> str | None:
+
         job_id = uuid.uuid4().hex
 
         try:
             # await self.remove_job(job_id)
             job = self.scheduler.add_job(
                 send_reminder_job,
-                trigger=IntervalTrigger(seconds=15),
+                trigger=trigger_type,
+                timezone="Europe/Moscow",
                 id=job_id,
                 name=f"Reminder {reminder.id}",
                 replace_existing=True,
@@ -55,8 +56,10 @@ class SchedulerService:
                     "text": reminder.text,
                 },
                 misfire_grace_time=60 * 5,
+                **trigger_args,
             )
-            return job.id
+            logger.info(f"Added job for reminder {reminder.id}. Next run: {job.next_run_time}")
+            return job_id
         except Exception as e:
             logger.error(
                 f"Error scheduling job for reminder {reminder.id}: {e}", exc_info=True

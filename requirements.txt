@@ -1,5 +1,5 @@
 aiofiles==24.1.0
-aiogram==3.19.0
+aiogram==3.20.0.post0
 aiogram_calendar==0.6.0
 aiohappyeyeballs==2.6.1
 aiohttp==3.11.14
@@ -36,6 +36,7 @@ pydantic_core==2.27.2
 pyflakes==3.3.1
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.0
+pytz==2025.2
 redis==5.2.1
 six==1.17.0
 SQLAlchemy==2.0.40

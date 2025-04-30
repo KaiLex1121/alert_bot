@@ -1,11 +1,13 @@
 import logging
 from datetime import datetime
 from typing import Optional
+import uuid
 
 from src.database.dao.holder import HolderDAO
 from src.database.dto.reminder import CreateReminderDTO
 from src.database.models.reminder import Reminder
 from src.services.scheduler import SchedulerService
+from src.utils.datetime_utils import create_trigger_args
 
 logger = logging.getLogger(__name__)
 
@@ -23,17 +25,24 @@ class ReminderService:
         dao: HolderDAO,
         dto: CreateReminderDTO,
     ) -> Reminder | None:
+
         try:
             reminder = await dao.reminder.create_reminder(
-                tg_user_id=dto.tg_user_id,
+                db_user_id=dto.db_user_id,
                 text=dto.text,
-                start_datetime=dto.start_datetime,
-                frequency_type=dto.frequency_type,
+                start_datetime=datetime.fromisoformat(dto.start_datetime),
+                frequency_type=dto.frequency_type.upper(),
                 custom_frequency=dto.custom_frequency,
                 apscheduler_job_id=None,
             )
-            print(reminder)
-            job_id = await scheduler_service.add_reminder_job(reminder, dto.tg_user_id)
+
+            job_trigger_type, job_trigger_args = create_trigger_args(
+                dto.frequency_type,
+                dto.start_datetime,
+                dto.custom_frequency,
+            )
+
+            job_id = await scheduler_service.add_reminder_job(reminder, dto.tg_user_id, job_trigger_type, job_trigger_args)
 
             if job_id:
                 await dao.base.update(reminder, {"apscheduler_job_id": job_id})
@@ -44,13 +53,13 @@ class ReminderService:
                 return reminder
             else:
                 logger.error(
-                    f"Failed to schedule job for new reminder (user_id={dto.bd_user_id}). Rolling back."
+                    f"Failed to schedule job for new reminder (user_id={dto.db_user_id}). Rolling back."
                 )
                 await dao.base.rollback()
                 return None
         except Exception as e:
             logger.error(
-                f"Error creating reminder for user {dto.bd_user_id}: {e}", exc_info=True
+                f"Error creating reminder for user {dto.db_user_id}: {e}", exc_info=True
             )
             await dao.base.rollback()
             return None

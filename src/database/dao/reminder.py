@@ -1,7 +1,9 @@
+import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.dao.base import BaseDAO
 from src.database.models.reminder import Reminder
+from src.enums.reminder import FrequencyType
 
 
 class ReminderDAO(BaseDAO[Reminder]):
@@ -10,15 +12,15 @@ class ReminderDAO(BaseDAO[Reminder]):
 
     async def create_reminder(
         self,
-        tg_user_id,
-        apscheduler_job_id,
-        text,
-        start_datetime,
-        frequency_type,
-        custom_frequency,
+        db_user_id: int,
+        apscheduler_job_id: str,
+        text: str,
+        start_datetime: datetime,
+        frequency_type: FrequencyType,
+        custom_frequency: dict[str, int]
     ) -> Reminder:
         reminder = Reminder(
-            user_id=tg_user_id,
+            user_id=db_user_id,
             text=text,
             start_datetime=start_datetime,
             frequency_type=frequency_type,

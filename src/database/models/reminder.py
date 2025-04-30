@@ -4,7 +4,7 @@ import datetime
 from datetime import datetime
 from typing import Any, Dict
 
-from sqlalchemy import JSON, Boolean, DateTime, Enum, ForeignKey, String
+from sqlalchemy import JSON, Boolean, DateTime, Enum, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database.models.base import Base
@@ -29,7 +29,7 @@ class Reminder(Base):
     )
     custom_frequency: Mapped[Dict[str, Any] | None] = mapped_column(JSON, nullable=True)
     start_datetime: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     apscheduler_job_id: Mapped[str | None] = mapped_column(
         String(255), unique=True, index=True
