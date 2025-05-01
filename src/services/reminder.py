@@ -1,7 +1,7 @@
 import logging
+import uuid
 from datetime import datetime
 from typing import Optional
-import uuid
 
 from src.database.dao.holder import HolderDAO
 from src.database.dto.reminder import CreateReminderDTO
@@ -35,15 +35,17 @@ class ReminderService:
                 custom_frequency=dto.custom_frequency,
                 apscheduler_job_id=None,
             )
-
+            await dao.base.flush(reminder)
             job_trigger_type, job_trigger_args = create_trigger_args(
                 dto.frequency_type,
                 dto.start_datetime,
                 dto.custom_frequency,
             )
-
-            job_id = await scheduler_service.add_reminder_job(reminder, dto.tg_user_id, job_trigger_type, job_trigger_args)
-
+            job_id, job_next_run_time = await scheduler_service.add_reminder_job(
+                reminder, dto.tg_user_id, job_trigger_type, job_trigger_args
+            )
+            print(job_next_run_time)
+            print(type(job_next_run_time))
             if job_id:
                 await dao.base.update(reminder, {"apscheduler_job_id": job_id})
                 await dao.base.commit()
