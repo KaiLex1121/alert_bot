@@ -1,4 +1,4 @@
-from src.database import dto
+from src import dto
 from src.database.dao.user import UserDAO
 
 

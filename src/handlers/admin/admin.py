@@ -9,7 +9,6 @@ from src.database.dao.holder import HolderDAO
 from src.filters import admin
 from src.services.broadcaster import broadcast
 from src.states.admin import MakeBroadcastState
-from src.text.text import AdminMessages
 
 router: Router = Router()
 router.message.filter(admin.AdminFilter())

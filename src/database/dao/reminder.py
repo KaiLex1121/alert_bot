@@ -1,5 +1,6 @@
 import datetime
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.dao.base import BaseDAO
@@ -34,3 +35,33 @@ class ReminderDAO(BaseDAO[Reminder]):
     async def delete_all_reminders(self):
         all_reminders = await self.get_all()
         return all_reminders
+
+    async def get_active_user_reminders(self, user_id: int):
+        stmt = (
+            select(Reminder)
+            .where(Reminder.user_id == user_id, Reminder.is_active == True)
+            .order_by(Reminder.start_datetime.asc())
+        )
+        result = await self.session.execute(stmt)
+        reminders = result.scalars().all()
+        return reminders
+
+    async def get_disabled_user_reminders(self, user_id: int):
+        stmt = (
+            select(Reminder)
+            .where(Reminder.user_id == user_id, Reminder.is_active == False)
+            .order_by(Reminder.start_datetime.asc())  #
+        )
+        result = await self.session.execute(stmt)
+        reminders = result.scalars().all()
+        return reminders
+
+    async def get_all_user_reminders(self, user_id: int):
+        stmt = (
+            select(Reminder)
+            .where(Reminder.user_id == user_id)
+            .order_by(Reminder.start_datetime.asc())
+        )
+        result = await self.session.execute(stmt)
+        reminders = result.scalars().all()
+        return reminders

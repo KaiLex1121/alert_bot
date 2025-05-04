@@ -5,6 +5,26 @@ from typing import Any, Dict, Optional, Tuple, Union
 from dateutil.relativedelta import relativedelta
 
 
+def convert_dt_to_russian(dt: str | datetime) -> str:
+    months = {
+        1: "января",
+        2: "февраля",
+        3: "марта",
+        4: "апреля",
+        5: "мая",
+        6: "июня",
+        7: "июля",
+        8: "августа",
+        9: "сентября",
+        10: "октября",
+        11: "ноября",
+        12: "декабря",
+    }
+    if isinstance(dt, str):
+        dt = datetime.fromisoformat(dt)
+    return f"{dt.day} {months[dt.month]} {dt.year} года в {dt.hour:02d}:{dt.minute:02d}"
+
+
 def parse_frequency(frequency: str | None) -> Dict[str, int]:
 
     if frequency:
@@ -71,7 +91,9 @@ def parse_start_time(start_time: str) -> str:
     }
 
     # Паттерн для формата "DD month YYYY года/г HH:MM"
-    full_pattern = r"(\d{1,2})\s*([а-яА-Я]+)\s*(\d{4})\s*(?:года|г)?\s*(\d{1,2}):(\d{2})"
+    full_pattern = (
+        r"(\d{1,2})\s*([а-яА-Я]+)\s*(\d{4})\s*(?:года|г)?\s*(\d{1,2}):(\d{2})"
+    )
     # Паттерн для формата "HH:MM"
     time_pattern = r"(\d{1,2}):(\d{2})"
 
@@ -92,7 +114,11 @@ def parse_start_time(start_time: str) -> str:
 
         # Создаем объект datetime
         dt = datetime(
-            year=int(year), month=month, day=int(day), hour=int(hour), minute=int(minute)
+            year=int(year),
+            month=month,
+            day=int(day),
+            hour=int(hour),
+            minute=int(minute),
         )
         return dt.isoformat()
 
@@ -104,7 +130,11 @@ def parse_start_time(start_time: str) -> str:
         now = datetime.now()
         # Создаем объект datetime с текущей датой и указанным временем
         dt = datetime(
-            year=now.year, month=now.month, day=now.day, hour=int(hour), minute=int(minute)
+            year=now.year,
+            month=now.month,
+            day=now.day,
+            hour=int(hour),
+            minute=int(minute),
         )
         return dt.isoformat()
 
@@ -172,9 +202,6 @@ def create_trigger_args(
         # Вычисляем разницу в секундах между начальной и следующей датой
         total_seconds = int((next_dt - dt).total_seconds())
 
-        return "interval", {
-            "start_date": start_datetime,
-            "seconds": total_seconds
-        }
+        return "interval", {"start_date": start_datetime, "seconds": total_seconds}
     else:
         raise ValueError(f"Неподдерживаемый тип частоты: {frequency_type}")

@@ -3,17 +3,21 @@ from typing import Union
 from aiogram import Bot, F, Router
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.storage.redis import Redis
 from aiogram.types import CallbackQuery, Message
 
 from src.database.dao.holder import HolderDAO
-from src.database.dto.reminder import CreateReminderDTO
 from src.database.models.user import User
+from src.dto.reminder import CreateReminderDTO
 from src.keyboards.reminder_creation import ReminderCreationKeyboards
 from src.services.reminder import ReminderService
 from src.services.scheduler import SchedulerService
 from src.states.general import ReminderCreateStates
-from src.utils.datetime_utils import parse_frequency, parse_start_time
+from src.text.formatters.reminder_creation import get_formateed_confirmation_text
+from src.utils.datetime_utils import (
+    convert_dt_to_russian,
+    parse_frequency,
+    parse_start_time,
+)
 
 router: Router = Router()
 
@@ -30,6 +34,7 @@ async def fill_reminder_name(callback: CallbackQuery, state: FSMContext, user: U
     )
     await callback.message.edit_text(
         text="Введите краткий текст напоминания",
+        reply_markup=ReminderCreationKeyboards.to_main_menu,
     )
     await state.set_state(ReminderCreateStates.waiting_for_name)
 
@@ -88,7 +93,7 @@ async def choose_reminder_start_time(
 async def fill_start_datetime(callback: CallbackQuery, state: FSMContext):
     await state.update_data(start_datetime=callback.data)
     await callback.message.edit_text(
-        text="Введите дату начала напоминания в формате «ДД.ММ.ГГГГ ЧЧ:ММ»",
+        text="Введите дату начала напоминания в формате: «1 января 2000 года 12:00» или «12:00», если хотите, чтобы напоминание началось сегодня",
         reply_markup=ReminderCreationKeyboards.to_main_menu,
     )
     await state.set_state(ReminderCreateStates.waiting_for_start_datetime)
@@ -107,7 +112,8 @@ async def confirm_reminder_creation(
         formated_start_datetime = parse_start_time(event.text)
         await state.update_data(start_datetime=formated_start_datetime)
         data = await state.get_data()
-        formatted_data = "\n\n".join(f"{key}: {value}" for key, value in data.items())
+        print(data)
+        formatted_data = get_formateed_confirmation_text(data)
         await event.answer(
             text=f"{formatted_data}",
             reply_markup=ReminderCreationKeyboards.confirm_reminder_creation,
@@ -116,7 +122,7 @@ async def confirm_reminder_creation(
         formated_start_datetime = parse_start_time(event.data)
         await state.update_data(start_datetime=formated_start_datetime)
         data = await state.get_data()
-        formatted_data = "\n".join(f"{key}: {value}" for key, value in data.items())
+        formatted_data = get_formateed_confirmation_text(data)
         await event.message.edit_text(
             text=f"{formatted_data}",
             reply_markup=ReminderCreationKeyboards.confirm_reminder_creation,
@@ -136,9 +142,10 @@ async def show_creation_confirmation(
 ):
     data = await state.get_data()
     dto = CreateReminderDTO.from_dict(data)
-    await reminder_service.create_reminder(
+    next_run = await reminder_service.create_reminder(
         dto=dto, scheduler_service=scheduler_service, dao=dao
     )
     await callback.message.edit_text(
-        text="Напоминание создано", reply_markup=ReminderCreationKeyboards.to_main_menu
+        text=f"Напоминание создано, следующий запуск: {convert_dt_to_russian(next_run)}",
+        reply_markup=ReminderCreationKeyboards.to_main_menu,
     )

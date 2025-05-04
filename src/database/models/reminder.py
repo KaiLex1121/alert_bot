@@ -34,6 +34,11 @@ class Reminder(Base):
     apscheduler_job_id: Mapped[str | None] = mapped_column(
         String(255), unique=True, index=True
     )
+    next_run_time: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        index=True,
+    )
 
     def __repr__(self):
         return (

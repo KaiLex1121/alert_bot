@@ -3,7 +3,7 @@ from __future__ import annotations
 from sqlalchemy import BigInteger
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.database import dto
+from src import dto
 from src.database.models.base import Base
 
 

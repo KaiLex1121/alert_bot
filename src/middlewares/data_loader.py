@@ -3,7 +3,7 @@ from typing import Any, Awaitable, Callable
 from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject
 
-from src.database import dto
+from src import dto
 from src.database.dao.holder import HolderDAO
 
 # from app.services.chat import upsert_chat

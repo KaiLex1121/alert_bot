@@ -8,7 +8,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
 from src.database.dao.holder import HolderDAO
-from src.database.dto.user import User
+from src.dto.user import User
 from src.keyboards.main_menu import MainMenuKeyboards
 from src.services.reminder import ReminderService
 from src.services.scheduler import SchedulerService
@@ -73,28 +73,7 @@ async def create_reminder(
 @router.message(Command("disable_reminders"))
 async def disable_reminders(
     message: Message,
-    reminder_service: ReminderService,
     scheduler_service: SchedulerService,
-    dao: HolderDAO,
 ):
-    await reminder_service.disable_all_reminders(scheduler_service, dao)
-    await message.answer(text="Reminders are disabled")
-
-
-@router.message(Command("enable_reminders"))
-async def enable_reminders(
-    message: Message,
-    reminder_service: ReminderService,
-    scheduler_service: SchedulerService,
-    dao: HolderDAO,
-):
-    await reminder_service.enable_all_reminders(scheduler_service, dao)
-    await message.answer(text="Reminders are enabled")
-
-
-@router.message(Command("get_all_reminders"))
-async def get_all_reminders(
-    message: Message, reminder_service: ReminderService, dao: HolderDAO
-):
-    reminders = await reminder_service.get_all_reminders(dao)
-    await message.answer(text=f"Reminders: {reminders}")
+    await scheduler_service.remove_all_jobs()
+    await message.answer(text="Removed")
