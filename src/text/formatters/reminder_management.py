@@ -17,7 +17,7 @@ def get_formatted_reminder_text(reminder: GetReminderToShowDTO):
     frequency = custom_frequency if custom_frequency is not None else default_frequency
     next_run_time = (
         "напоминание отключено"
-        if reminder.next_run_time is None
+        if reminder.is_active is False
         else convert_dt_to_russian(
             reminder.next_run_time.astimezone(ZoneInfo("Europe/Moscow"))
         )
