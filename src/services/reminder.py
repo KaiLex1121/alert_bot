@@ -88,21 +88,21 @@ class ReminderService:
 
     async def disable_reminder(
         self, dao: HolderDAO, reminder_id: int, scheduler_service: SchedulerService
-    ) -> bool:
+    ) -> Reminder:
         reminder = await dao.reminder.get_by_id(reminder_id)
         await dao.reminder.update(reminder, {"is_active": False})
         await dao.base.commit()
         await scheduler_service.pause_job(reminder.apscheduler_job_id)
-        return reminder.is_active
+        return reminder
 
     async def enable_reminder(
         self, dao: HolderDAO, reminder_id: int, scheduler_service: SchedulerService
-    ) -> bool:
+    ) -> Reminder:
         reminder = await dao.reminder.get_by_id(reminder_id)
         await dao.reminder.update(reminder, {"is_active": True})
         await dao.base.commit()
         await scheduler_service.resume_job(reminder.apscheduler_job_id)
-        return reminder.is_active
+        return reminder
 
     async def get_all_user_reminders(self, dao: HolderDAO, user_id: int):
         try:

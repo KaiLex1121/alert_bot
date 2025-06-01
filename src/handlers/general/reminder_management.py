@@ -26,11 +26,14 @@ async def disable_reminder(
     scheduler_service: SchedulerService,
 ):
     reminder_id = int(callback.data.split(":")[1])
-    updated_reminder_status = await reminder_service.disable_reminder(
+    reminder = await reminder_service.disable_reminder(
         dao=dao, reminder_id=reminder_id, scheduler_service=scheduler_service
     )
+    formatted_reminder_text = get_formatted_reminder_text(reminder)
+    updated_reminder_status = reminder.is_active
+    await callback.answer("Напоминание отключено")
     await callback.message.edit_text(
-        text="Напоминание отключено",
+        text=formatted_reminder_text,
         reply_markup=ReminderManagementKeyboards.get_reminder_management_keyboard_by_status(
             reminder_id, updated_reminder_status
         ),
@@ -45,30 +48,14 @@ async def enable_reminder(
     scheduler_service: SchedulerService,
 ):
     reminder_id = int(callback.data.split(":")[1])
-    updated_reminder_status = await reminder_service.enable_reminder(
+    reminder = await reminder_service.enable_reminder(
         dao=dao, reminder_id=reminder_id, scheduler_service=scheduler_service
     )
+    formatted_reminder_text = get_formatted_reminder_text(reminder)
+    updated_reminder_status = reminder.is_active
+    await callback.answer("Напоминание включено")
     await callback.message.edit_text(
-        text="Напоминание включено",
-        reply_markup=ReminderManagementKeyboards.get_reminder_management_keyboard_by_status(
-            reminder_id, updated_reminder_status
-        ),
-    )
-
-
-@router.callback_query(F.data.startswith("enable_reminder"))
-async def enable_reminder_with_reset(
-    callback: CallbackQuery,
-    reminder_service: ReminderService,
-    dao: HolderDAO,
-    scheduler_service: SchedulerService,
-):
-    reminder_id = int(callback.data.split(":")[1])
-    updated_reminder_status = await reminder_service.enable_reminder(
-        dao=dao, reminder_id=reminder_id, scheduler_service=scheduler_service
-    )
-    await callback.message.edit_text(
-        text="Напоминание включено",
+        text=formatted_reminder_text,
         reply_markup=ReminderManagementKeyboards.get_reminder_management_keyboard_by_status(
             reminder_id, updated_reminder_status
         ),
