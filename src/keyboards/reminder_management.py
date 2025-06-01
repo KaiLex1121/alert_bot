@@ -17,8 +17,8 @@ class ReminderManagementKeyboards:
             inline_keyboard=[
                 [
                     InlineKeyboardButton(
-                        text="Показать детали",
-                        callback_data=f"show_reminder_details:{reminder_id}:{reminder_status}",
+                        text="Сбросить время запуска",
+                        callback_data=f"reset_reminder_start_time:{reminder_id}:{reminder_status}",
                     )
                 ],
                 [

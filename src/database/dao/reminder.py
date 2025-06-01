@@ -29,7 +29,9 @@ class ReminderDAO(BaseDAO[Reminder]):
             custom_frequency=custom_frequency,
             apscheduler_job_id=apscheduler_job_id,
         )
-        await self.create(reminder)
+        reminder = await self.create(reminder)
+        await self.flush()
+        await self.refresh(reminder)
         return reminder
 
     async def delete_all_reminders(self):

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 from datetime import datetime
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict
 
 from sqlalchemy import JSON, Boolean, DateTime, Enum, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -10,6 +10,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.database.models.base import Base
 from src.enums.reminder import FrequencyType
 
+if TYPE_CHECKING:
+    from src.database.models.user import User
 
 class Reminder(Base):
     __tablename__ = "reminders"
@@ -45,5 +47,7 @@ class Reminder(Base):
             f"Reminder(id={self.id}, user_id={self.user_id}, text={self.text}, "
             f"is_active={self.is_active}, frequency_type={self.frequency_type}, "
             f"custom_frequency={self.custom_frequency}, start_datetime={self.start_datetime}, "
-            f"apscheduler_job_id={self.apscheduler_job_id})"
+            f"apscheduler_job_id={self.apscheduler_job_id}), "
+            f"(start_datetime={self.start_datetime}, "
+            f"next_run_time={self.next_run_time})"
         )

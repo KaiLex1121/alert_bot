@@ -1,4 +1,5 @@
 from typing import Union
+from zoneinfo import ZoneInfo
 
 from aiogram import Bot, F, Router
 from aiogram.filters import StateFilter
@@ -142,10 +143,11 @@ async def show_creation_confirmation(
 ):
     data = await state.get_data()
     dto = CreateReminderDTO.from_dict(data)
-    next_run = await reminder_service.create_reminder(
+    reminder = await reminder_service.create_reminder(
         dto=dto, scheduler_service=scheduler_service, dao=dao
     )
+    next_run = reminder.next_run_time
     await callback.message.edit_text(
-        text=f"Напоминание создано, следующий запуск: {convert_dt_to_russian(next_run)}",
+        text=f"Напоминание создано, следующий запуск: {convert_dt_to_russian(next_run.astimezone(ZoneInfo('Europe/Moscow')))}",
         reply_markup=ReminderCreationKeyboards.to_main_menu,
     )

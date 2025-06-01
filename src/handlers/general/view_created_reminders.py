@@ -1,3 +1,4 @@
+import asyncio
 from aiogram import F, Router
 from aiogram.types import CallbackQuery, Message
 
@@ -7,6 +8,7 @@ from src.keyboards.reminder_management import ReminderManagementKeyboards
 from src.keyboards.view_created_reminders import ViewCreatedRemindersKeyboards
 from src.services.reminder import ReminderService
 from src.services.scheduler import SchedulerService
+from src.text.formatters.reminder_management import get_formatted_reminder_text
 
 router: Router = Router()
 
@@ -29,22 +31,27 @@ async def show_all_reminders_list(
     all_reminders = await reminder_service.get_all_user_reminders(
         dao=dao, user_id=user.db_id
     )
-    if not all_reminders:
+    if all_reminders:
+        for reminder in all_reminders:
+            reminder_to_show = get_formatted_reminder_text(reminder)
+            keyboard = (
+                ReminderManagementKeyboards.get_reminder_management_keyboard_by_status(
+                    reminder.id, reminder.is_active
+                )
+            )
+            await callback.message.answer(
+                text=reminder_to_show,
+                reply_markup=keyboard,
+            )
+            await asyncio.sleep(
+                    0.05
+                )
+    else:
         await callback.message.edit_text(
             text="У вас нет созданных напоминаний",
             reply_markup=ViewCreatedRemindersKeyboards.show_created_reminders,
         )
         return
-    for reminder in all_reminders:
-        keyboard = (
-            ReminderManagementKeyboards.get_reminder_management_keyboard_by_status(
-                reminder.id, reminder.is_active
-            )
-        )
-        await callback.message.answer(
-            text=reminder.text,
-            reply_markup=keyboard,
-        )
     await callback.message.answer(
         text="Выберите нужное действие",
         reply_markup=ViewCreatedRemindersKeyboards.show_all_reminders_management,
@@ -61,26 +68,26 @@ async def show_active_reminders_list(
     all_reminders = await reminder_service.get_active_user_reminders(
         dao=dao, user_id=user.db_id
     )
-    if not all_reminders:
+    if all_reminders:
+        for reminder in all_reminders:
+            reminder_to_show = get_formatted_reminder_text(reminder)
+            keyboard = (
+                ReminderManagementKeyboards.get_reminder_management_keyboard_by_status(
+                    reminder.id, reminder.is_active
+                )
+            )
+            await callback.message.answer(
+                text=reminder_to_show,
+                reply_markup=keyboard,
+            )
+            await asyncio.sleep(
+                    0.05
+                )
+    else:
         await callback.message.edit_text(
             text="У вас нет активных напоминаний",
             reply_markup=ViewCreatedRemindersKeyboards.show_created_reminders,
         )
-        return
-    for reminder in all_reminders:
-        keyboard = (
-            ReminderManagementKeyboards.get_reminder_management_keyboard_by_status(
-                reminder.id, reminder.is_active
-            )
-        )
-        await callback.message.answer(
-            text=reminder.text,
-            reply_markup=keyboard,
-        )
-    await callback.message.answer(
-        text="Выберите нужное действие",
-        reply_markup=ViewCreatedRemindersKeyboards.show_active_reminders_management,
-    )
 
 
 @router.callback_query(F.data == "show_disabled_reminders_list")
@@ -93,22 +100,30 @@ async def show_disabled_reminders_list(
     all_reminders = await reminder_service.get_disabled_user_reminders(
         dao=dao, user_id=user.db_id
     )
-    if not all_reminders:
+    if all_reminders:
+        for reminder in all_reminders:
+
+            reminder_to_show = get_formatted_reminder_text(reminder)
+
+            keyboard = (
+                ReminderManagementKeyboards.get_reminder_management_keyboard_by_status(
+                    reminder.id, reminder.is_active
+                )
+            )
+            await callback.message.answer(
+                text=reminder_to_show,
+                reply_markup=keyboard,
+            )
+            await asyncio.sleep(
+                    0.05
+                )
+    else:
         await callback.message.edit_text(
             text="У вас нет неактивных напоминаний",
             reply_markup=ViewCreatedRemindersKeyboards.show_created_reminders,
         )
-        return
-    for reminder in all_reminders:
-        keyboard = (
-            ReminderManagementKeyboards.get_reminder_management_keyboard_by_status(
-                reminder.id, reminder.is_active
-            )
-        )
-        await callback.message.answer(
-            text=reminder.text,
-            reply_markup=keyboard,
-        )
+
+
     await callback.message.answer(
         text="Выберите нужное действие",
         reply_markup=ViewCreatedRemindersKeyboards.show_disabled_reminders_management,
@@ -123,7 +138,9 @@ async def delete_all_active_reminders(
     scheduler_service: SchedulerService,
     dao: HolderDAO,
 ):
-    await reminder_service.delete_all_active_user_reminders(dao=dao, user_id=user.db_id, scheduler_service=scheduler_service)
+    await reminder_service.delete_all_active_user_reminders(
+        dao=dao, user_id=user.db_id, scheduler_service=scheduler_service
+    )
     await callback.message.edit_text(
         text="Все активные напоминания удалены",
         reply_markup=ViewCreatedRemindersKeyboards.show_created_reminders,
@@ -155,7 +172,9 @@ async def delete_all_reminders(
     scheduler_service: SchedulerService,
     dao: HolderDAO,
 ):
-    await reminder_service.delete_all_user_reminders(dao=dao, user_id=user.db_id, scheduler_service=scheduler_service)
+    await reminder_service.delete_all_user_reminders(
+        dao=dao, user_id=user.db_id, scheduler_service=scheduler_service
+    )
     await callback.message.edit_text(
         text="Все напоминания удалены",
         reply_markup=ViewCreatedRemindersKeyboards.show_created_reminders,
@@ -170,7 +189,9 @@ async def disable_all_reminders(
     dao: HolderDAO,
     user: User,
 ):
-    await reminder_service.disable_all_user_reminders(scheduler_service, dao, user.db_id)
+    await reminder_service.disable_all_user_reminders(
+        scheduler_service, dao, user.db_id
+    )
     await message.answer(text="Все напоминания отключены")
 
 

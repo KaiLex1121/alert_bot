@@ -5,6 +5,9 @@ from typing import List
 
 from apscheduler.job import Job
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.date import DateTrigger
+from apscheduler.triggers.interval import IntervalTrigger
+from apscheduler.triggers.cron import CronTrigger
 
 from src.core.context import AppContext
 from src.database.models.reminder import Reminder
@@ -175,3 +178,17 @@ class SchedulerService:
             self.scheduler.remove_all_jobs()
         except Exception as e:
             logger.error(f"Error removing all jobs: {e}", exc_info=True)
+
+    async def reset_job_start_time(
+        self, job_id: str, trigger_type: str, trigger_args: dict
+    ) -> bool:
+        job = self.scheduler.get_job(job_id)
+        if not job:
+            logger.warning(f"Задача с ID '{job_id}' не найдена.")
+            return False
+        try:
+            self.scheduler.reschedule_job(job_id, trigger=trigger_type, **trigger_args)
+        except Exception as e:
+            logger.error(f"Error rescheduling job {job_id}: {e}", exc_info=True)
+            return False
+        return True

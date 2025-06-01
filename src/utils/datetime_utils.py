@@ -141,21 +141,19 @@ def parse_start_time(start_time: str) -> str:
 
 def create_trigger_args(
     frequency_type: str,
-    start_datetime: str,
+    start_datetime: str | datetime,
     custom_frequency: Optional[Dict[str, Any]] = None,
 ) -> Tuple[str, Dict[str, Any]]:
-    try:
+    if isinstance(start_datetime, str):
         dt = datetime.fromisoformat(start_datetime)
-    except ValueError as e:
-        raise ValueError(
-            f"Неверный формат даты: {start_datetime}. Ожидается ISO формат."
-        ) from e
-
+    else:
+        dt = start_datetime
     if frequency_type == "daily":
         return "cron", {
             "start_date": start_datetime,
             "hour": dt.hour,
             "minute": dt.minute,
+            "second": dt.second,
         }
     elif frequency_type == "weekly":
         return "cron", {
