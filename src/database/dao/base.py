@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Generic, List, Optional, Type, TypeVar, Sequence
+from typing import Any, Generic, List, Optional, Sequence, Type, TypeVar
 
 from sqlalchemy import delete, func
 from sqlalchemy.ext.asyncio import AsyncSession

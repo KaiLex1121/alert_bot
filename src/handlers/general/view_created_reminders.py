@@ -1,4 +1,5 @@
 import asyncio
+
 from aiogram import F, Router
 from aiogram.types import CallbackQuery, Message
 
@@ -43,9 +44,7 @@ async def show_all_reminders_list(
                 text=reminder_to_show,
                 reply_markup=keyboard,
             )
-            await asyncio.sleep(
-                    0.05
-                )
+            await asyncio.sleep(0.05)
     else:
         await callback.message.edit_text(
             text="У вас нет созданных напоминаний",
@@ -80,9 +79,7 @@ async def show_active_reminders_list(
                 text=reminder_to_show,
                 reply_markup=keyboard,
             )
-            await asyncio.sleep(
-                    0.05
-                )
+            await asyncio.sleep(0.05)
     else:
         await callback.message.edit_text(
             text="У вас нет активных напоминаний",
@@ -114,15 +111,12 @@ async def show_disabled_reminders_list(
                 text=reminder_to_show,
                 reply_markup=keyboard,
             )
-            await asyncio.sleep(
-                    0.05
-                )
+            await asyncio.sleep(0.05)
     else:
         await callback.message.edit_text(
             text="У вас нет неактивных напоминаний",
             reply_markup=ViewCreatedRemindersKeyboards.show_created_reminders,
         )
-
 
     await callback.message.answer(
         text="Выберите нужное действие",

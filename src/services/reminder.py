@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
+
 from src.database.dao.holder import HolderDAO
 from src.database.models.reminder import Reminder
 from src.dto.reminder import CreateReminderDTO, GetReminderToShowDTO
@@ -42,8 +43,7 @@ class ReminderService:
             )
             await dao.base.update(
                 reminder,
-                {"apscheduler_job_id": job.id,
-                 "next_run_time": job.next_run_time},
+                {"apscheduler_job_id": job.id, "next_run_time": job.next_run_time},
             )
             logger.info(
                 f"Successfully created reminder {reminder.id} with job_id {job.id} and next run time {job.next_run_time}"
@@ -195,9 +195,7 @@ class ReminderService:
             if reminder.start_datetime > datetime.now(ZoneInfo("Europe/Moscow")):
                 return reminder
             if not reminder:
-                logger.error(
-                    f"Error getting reminder. Reminder id: {reminder_id}"
-                )
+                logger.error(f"Error getting reminder. Reminder id: {reminder_id}")
                 return None
             start_datetime = datetime.now(ZoneInfo("Europe/Moscow"))
             job_trigger_type, job_trigger_args = create_trigger_args(
@@ -206,13 +204,17 @@ class ReminderService:
                 custom_frequency=reminder.custom_frequency,
             )
             is_reset = await scheduler_service.reset_job_start_time(
-                job_id=reminder.apscheduler_job_id, trigger_type=job_trigger_type, trigger_args=job_trigger_args
+                job_id=reminder.apscheduler_job_id,
+                trigger_type=job_trigger_type,
+                trigger_args=job_trigger_args,
             )
             if not is_reset:
                 logger.error(
                     f"Error resetting reminder start time. Job id: {reminder.apscheduler_job_id}"
                 )
-            updated_job = await scheduler_service.get_job_by_id(job_id=reminder.apscheduler_job_id)
+            updated_job = await scheduler_service.get_job_by_id(
+                job_id=reminder.apscheduler_job_id
+            )
             updated_reminder = await dao.reminder.update(
                 reminder,
                 {
@@ -221,9 +223,7 @@ class ReminderService:
                 },
             )
             if not updated_reminder:
-                logger.error(
-                    f"Error updating reminder. Reminder id: {reminder_id}"
-                )
+                logger.error(f"Error updating reminder. Reminder id: {reminder_id}")
             await dao.base.commit()
             return updated_reminder
         except Exception as e:

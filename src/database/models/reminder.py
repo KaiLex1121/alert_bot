@@ -13,6 +13,7 @@ from src.enums.reminder import FrequencyType
 if TYPE_CHECKING:
     from src.database.models.user import User
 
+
 class Reminder(Base):
     __tablename__ = "reminders"
     __mapper_args__ = {"eager_defaults": True}

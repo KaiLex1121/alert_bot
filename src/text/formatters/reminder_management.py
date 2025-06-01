@@ -1,9 +1,8 @@
 from zoneinfo import ZoneInfo
+
 from src.dto.reminder import GetReminderToShowDTO
-from src.text.formatters.general import (
-    format_custom_frequency_to_russian,
-    format_reminder_enum_value_to_russian,
-)
+from src.text.formatters.general import (format_custom_frequency_to_russian,
+                                         format_reminder_enum_value_to_russian)
 from src.utils.datetime_utils import convert_dt_to_russian
 
 
@@ -19,7 +18,10 @@ def get_formatted_reminder_text(reminder: GetReminderToShowDTO):
     next_run_time = (
         "напоминание отключено"
         if reminder.next_run_time is None
-        else convert_dt_to_russian(reminder.next_run_time.astimezone(ZoneInfo("Europe/Moscow"))))
+        else convert_dt_to_russian(
+            reminder.next_run_time.astimezone(ZoneInfo("Europe/Moscow"))
+        )
+    )
 
     status = "активен" if reminder.is_active else "неактивен"
 

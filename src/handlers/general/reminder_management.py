@@ -75,7 +75,6 @@ async def enable_reminder_with_reset(
     )
 
 
-
 @router.callback_query(F.data.startswith("delete_reminder"))
 async def delete_reminder(
     callback: CallbackQuery,
@@ -111,7 +110,9 @@ async def reset_reminder_start_time(
             ),
         )
     else:
-        await callback.answer("У этого типа напоминаний нельзя сбросить время начала напоминания")
+        await callback.answer(
+            "У этого типа напоминаний нельзя сбросить время начала напоминания"
+        )
         await callback.message.edit_text(
             text=formatted_reminder_text,
             reply_markup=ReminderManagementKeyboards.get_reminder_management_keyboard_by_status(
