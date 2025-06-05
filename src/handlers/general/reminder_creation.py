@@ -149,3 +149,4 @@ async def show_creation_confirmation(
         text=f"Напоминание создано, следующий запуск: {convert_dt_to_russian(next_run.astimezone(ZoneInfo('Europe/Moscow')))}",
         reply_markup=ReminderCreationKeyboards.to_main_menu,
     )
+    await state.clear()
