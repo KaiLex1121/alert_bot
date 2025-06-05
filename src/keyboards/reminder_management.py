@@ -30,5 +30,10 @@ class ReminderManagementKeyboards:
                         text="Удалить", callback_data=f"delete_reminder:{reminder_id}"
                     ),
                 ],
+                [
+                    InlineKeyboardButton(
+                        text="В главное меню", callback_data="to_main_menu"
+                    )
+                ]
             ]
         )
