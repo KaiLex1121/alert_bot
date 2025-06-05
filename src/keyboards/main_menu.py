@@ -24,3 +24,7 @@ class MainMenuKeyboards:
             [MainMenuButtons.show_created_reminders],
         ]
     )
+
+    to_main_menu = InlineKeyboardMarkup(
+        inline_keyboard=[[MainMenuButtons.to_main_menu]]
+    )
