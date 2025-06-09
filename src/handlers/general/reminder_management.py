@@ -9,11 +9,12 @@ from aiogram.fsm.storage.redis import Redis
 from aiogram.types import CallbackQuery, Message
 
 from src.database.dao.holder import HolderDAO
+from src.keyboards.main_menu import MainMenuKeyboards
 from src.keyboards.reminder_management import ReminderManagementKeyboards
 from src.services.reminder import ReminderService
 from src.services.scheduler import SchedulerService
 from src.text.formatters.reminder_management import get_formatted_reminder_text
-from src.keyboards.main_menu import MainMenuKeyboards
+
 logger = logging.getLogger(__name__)
 router: Router = Router()
 
@@ -73,7 +74,9 @@ async def delete_reminder(
     await reminder_service.delete_reminder(
         dao=dao, reminder_id=reminder_id, scheduler_service=scheduler_service
     )
-    await callback.message.edit_text(text="Напоминание удалено", reply_markup=MainMenuKeyboards.to_main_menu)
+    await callback.message.edit_text(
+        text="Напоминание удалено", reply_markup=MainMenuKeyboards.to_main_menu
+    )
 
 
 @router.callback_query(F.data.startswith("reset_reminder_start_time"))

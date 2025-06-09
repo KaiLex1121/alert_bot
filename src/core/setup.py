@@ -13,9 +13,14 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from src.config.main_config import Config
 from src.core.context import AppContext
-from src.handlers import (admin, main_menu, reminder_creation,
-                          reminder_management, test_handlers,
-                          view_created_reminders)
+from src.handlers import (
+    admin,
+    main_menu,
+    reminder_creation,
+    reminder_management,
+    test_handlers,
+    view_created_reminders,
+)
 from src.middlewares.config import ConfigMiddleware
 from src.middlewares.data_loader import LoadDataMiddleware
 from src.middlewares.database import DBMiddleware
@@ -34,7 +39,7 @@ async def setup_full_app(
 ):
     setup_timezone()
     setup_logging()
-    setup_global_dependencies(bot)
+    setup_global_dependencies(bot, scheduler)
     setup_services(dp, scheduler)
     setup_middlewares(dp, pool, bot_config, redis)
     setup_handlers(dp)
@@ -53,8 +58,9 @@ async def setup_commands(bot: Bot):
     await bot.set_my_commands(commands)
 
 
-def setup_global_dependencies(bot: Bot) -> None:
+def setup_global_dependencies(bot: Bot, scheduler: AsyncIOScheduler) -> None:
     AppContext.set_bot(bot)
+    AppContext.set_scheduler(scheduler)
 
 
 def setup_timezone():

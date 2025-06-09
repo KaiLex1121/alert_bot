@@ -20,8 +20,13 @@ logger = logging.getLogger(__name__)
 
 
 # --- Функция задачи ---
-async def send_reminder_job(tg_user_id: int, reminder_id: int, reminder_status: bool, message_text: str, next_run_time: datetime):
+async def send_reminder_job(tg_user_id: int, reminder_id: int, reminder_status: bool, message_text: str, job_id: str):
+
     bot = AppContext.get_bot()
+    scheduler = AppContext.get_scheduler()
+    job = scheduler.get_job(job_id)
+    next_run_time = job.next_run_time
+
     try:
         logger.info(
             f"Sending reminder job for reminder_id={reminder_id} for user_id={tg_user_id}"
@@ -49,18 +54,11 @@ class SchedulerService:
         self, reminder: Reminder, tg_user_id: int, trigger_type, trigger_args
     ) -> Job | None:
         job_id = uuid.uuid4().hex
-        if trigger_type == 'cron':
-            trigger = CronTrigger(timezone="Europe/Moscow", **trigger_args)
-        elif trigger_type == 'date':
-            trigger = DateTrigger(timezone="Europe/Moscow", **trigger_args)
-        elif trigger_type == 'interval':
-            trigger = IntervalTrigger(timezone="Europe/Moscow", **trigger_args)
-        next_run_time = trigger.get_next_fire_time(None, datetime.datetime.now(datetime.timezone.utc))
 
         try:
             job = self.scheduler.add_job(
                 func=send_reminder_job,
-                trigger=trigger,
+                trigger=trigger_type,
                 timezone="Europe/Moscow",
                 id=job_id,
                 name=f"Reminder {reminder.id}",
@@ -70,7 +68,7 @@ class SchedulerService:
                     "reminder_id": reminder.id,
                     "reminder_status": reminder.is_active,
                     "message_text": reminder.text,
-                    "next_run_time": next_run_time,
+                    "job_id": job_id,
                     "reminder_status": reminder.is_active
                 },
                 **trigger_args,

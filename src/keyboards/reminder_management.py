@@ -34,6 +34,6 @@ class ReminderManagementKeyboards:
                     InlineKeyboardButton(
                         text="В главное меню", callback_data="to_main_menu"
                     )
-                ]
+                ],
             ]
         )
